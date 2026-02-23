@@ -1,0 +1,289 @@
+import html2canvas from 'html2canvas'
+import { ImageGenerationResult } from '../types'
+import { parseMarkdownToHTML, parseChoicesMarkdown } from '../utils/markdown'
+
+export class ImageGeneratorService {
+  async generatePostImage(
+    postText: string,
+    choices: string[],
+    backgroundImage?: string
+  ): Promise<ImageGenerationResult> {
+    // Create a temporary container for rendering
+    const container = document.createElement('div')
+    container.style.cssText = `
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      width: 600px;
+      padding: 40px;
+      ${backgroundImage
+        ? `background-image: url(${backgroundImage}); background-size: cover; background-position: center;`
+        : 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);'}
+      font-family: system-ui, -apple-system, sans-serif;
+      color: white;
+    `
+
+    // Add overlay for better text readability if background image is used
+    if (backgroundImage) {
+      const overlay = document.createElement('div')
+      overlay.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
+      `
+      container.appendChild(overlay)
+    }
+
+    // Create content wrapper for proper layering
+    const contentWrapper = document.createElement('div')
+    contentWrapper.style.cssText = `
+      position: relative;
+      z-index: 1;
+    `
+    container.appendChild(contentWrapper)
+
+    // Add post text with markdown parsing
+    const postDiv = document.createElement('div')
+    postDiv.style.cssText = `
+      font-size: 20px;
+      line-height: 1.6;
+      margin-bottom: ${choices.length > 0 ? '30px' : '0'};
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      white-space: pre-wrap;
+    `
+    postDiv.innerHTML = parseMarkdownToHTML(postText)
+    contentWrapper.appendChild(postDiv)
+
+    // Add choices if any
+    if (choices.length > 0) {
+      const choicesDiv = document.createElement('div')
+      choicesDiv.style.cssText = `
+        border-top: 2px solid rgba(255,255,255,0.3);
+        padding-top: 30px;
+      `
+
+      const choicesTitle = document.createElement('div')
+      choicesTitle.style.cssText = `
+        font-size: 16px;
+        margin-bottom: 15px;
+        opacity: 0.9;
+        font-weight: 600;
+      `
+      choicesTitle.textContent = 'What do you do?'
+      choicesDiv.appendChild(choicesTitle)
+
+      const parsedChoices = parseChoicesMarkdown(choices)
+      parsedChoices.forEach(choice => {
+        const choiceItem = document.createElement('div')
+        choiceItem.style.cssText = `
+          font-size: 18px;
+          margin: 10px 0;
+          padding: 10px 15px;
+          background: rgba(255,255,255,0.1);
+          border-radius: 8px;
+          backdrop-filter: blur(10px);
+        `
+        choiceItem.innerHTML = choice.html
+        choicesDiv.appendChild(choiceItem)
+      })
+
+      contentWrapper.appendChild(choicesDiv)
+    }
+
+    // Add to document temporarily
+    document.body.appendChild(container)
+
+    try {
+      // Generate the image with optimized scale for file size
+      const canvas = await html2canvas(container, {
+        backgroundColor: null, // Use the container's actual background
+        scale: 1.5, // Reduced from 2 to decrease file size while maintaining quality
+        logging: false,
+      })
+
+      // Get dimensions
+      const width = canvas.width
+      const height = canvas.height
+
+      // Skip cropping if we have a background image - preserve the full background
+      if (backgroundImage) {
+        return new Promise((resolve, reject) => {
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve({
+                  blob,
+                  dimensions: { width, height },
+                })
+              } else {
+                reject(new Error('Failed to create image blob'))
+              }
+            },
+            'image/jpeg',
+            0.85
+          )
+        })
+      }
+
+      // Find the actual content bounds to minimize blank space (only for gradient backgrounds)
+      const ctx = canvas.getContext('2d')
+      if (ctx) {
+        const imageData = ctx.getImageData(0, 0, width, height)
+        const bounds = this.findContentBounds(imageData)
+
+        // Create a new canvas with cropped dimensions
+        const croppedCanvas = document.createElement('canvas')
+        const padding = 20
+        croppedCanvas.width = bounds.width + (padding * 2)
+        croppedCanvas.height = bounds.height + (padding * 2)
+
+        const croppedCtx = croppedCanvas.getContext('2d')
+        if (croppedCtx) {
+          // Fill background with purple gradient color
+          croppedCtx.fillStyle = '#667eea'
+          croppedCtx.fillRect(0, 0, croppedCanvas.width, croppedCanvas.height)
+
+          // Draw the cropped image
+          croppedCtx.drawImage(
+            canvas,
+            bounds.x - padding,
+            bounds.y - padding,
+            bounds.width + (padding * 2),
+            bounds.height + (padding * 2),
+            0,
+            0,
+            croppedCanvas.width,
+            croppedCanvas.height
+          )
+
+          // Convert to blob with JPEG compression for smaller file size
+          return new Promise((resolve, reject) => {
+            croppedCanvas.toBlob(
+              (blob) => {
+                if (blob) {
+                  resolve({
+                    blob,
+                    dimensions: {
+                      width: croppedCanvas.width,
+                      height: croppedCanvas.height,
+                    },
+                  })
+                } else {
+                  reject(new Error('Failed to create image blob'))
+                }
+              },
+              'image/jpeg',
+              0.85 // Good quality/size balance
+            )
+          })
+        }
+      }
+
+      // Fallback to uncropped canvas
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve({
+                blob,
+                dimensions: { width, height },
+              })
+            } else {
+              reject(new Error('Failed to create image blob'))
+            }
+          },
+          'image/jpeg',
+          0.85
+        )
+      })
+    } finally {
+      // Clean up
+      document.body.removeChild(container)
+    }
+  }
+
+  private findContentBounds(imageData: ImageData): { x: number; y: number; width: number; height: number } {
+    const { width, height, data } = imageData
+    let minX = width, minY = height, maxX = 0, maxY = 0
+    let foundContent = false
+
+    // Scan for non-transparent and non-white pixels
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = (y * width + x) * 4
+        const r = data[idx]
+        const g = data[idx + 1]
+        const b = data[idx + 2]
+        const alpha = data[idx + 3]
+
+        // Check if pixel is not fully transparent and not pure white
+        const isNotWhite = !(r > 250 && g > 250 && b > 250)
+        if (alpha > 10 && (isNotWhite || foundContent)) {
+          minX = Math.min(minX, x)
+          minY = Math.min(minY, y)
+          maxX = Math.max(maxX, x)
+          maxY = Math.max(maxY, y)
+          foundContent = true
+        }
+      }
+    }
+
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX + 1,
+      height: maxY - minY + 1,
+    }
+  }
+
+  async generatePreviewElement(postText: string, _choices: string[], backgroundImage?: string): Promise<HTMLElement> {
+    const previewDiv = document.createElement('div')
+    previewDiv.className = 'post-preview'
+    previewDiv.style.cssText = `
+      ${backgroundImage
+        ? `background-image: url(${backgroundImage}); background-size: cover; background-position: center;`
+        : 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);'}
+      color: white;
+      padding: 2rem;
+      border-radius: 4px;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      position: relative;
+    `
+
+    // Add overlay if background image is used
+    if (backgroundImage) {
+      const overlay = document.createElement('div')
+      overlay.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 4px;
+      `
+      previewDiv.appendChild(overlay)
+    }
+
+    // Create content wrapper
+    const contentWrapper = document.createElement('div')
+    contentWrapper.style.cssText = `
+      position: relative;
+      z-index: 1;
+    `
+    previewDiv.appendChild(contentWrapper)
+
+    // Add post text with markdown parsing
+    const postElement = document.createElement('div')
+    postElement.style.cssText = `white-space: pre-wrap;`
+    postElement.innerHTML = parseMarkdownToHTML(postText)
+    contentWrapper.appendChild(postElement)
+
+    return previewDiv
+  }
+}
