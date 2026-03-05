@@ -1,6 +1,6 @@
 /* Default to dark theme */
 :root {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -24,20 +24,23 @@
   --color-border-hover: rgba(255, 255, 255, 0.25);
   --color-border-focus: rgba(255, 255, 255, 0.3);
 
-  --color-accent: #00bfff;
-  --color-accent-hover: #0099cc;
-  --color-accent-bg: rgba(0, 191, 255, 0.1);
-  --color-accent-bg-hover: rgba(0, 191, 255, 0.15);
+  --color-accent: #38bdf8;
+  --color-accent-hover: #0ea5e9;
+  --color-accent-secondary: #a78bfa;
+  --color-accent-bg: rgba(56, 189, 248, 0.1);
+  --color-accent-bg-hover: rgba(56, 189, 248, 0.15);
 
-  --color-success: #00ff00;
-  --color-success-bg: rgba(0, 255, 0, 0.1);
-  --color-success-border: rgba(0, 255, 0, 0.3);
+  --color-success: #22c55e;
+  --color-success-bg: rgba(34, 197, 94, 0.1);
+  --color-success-border: rgba(34, 197, 94, 0.3);
 
   --color-error: #ff6666;
   --color-error-bg: rgba(255, 0, 0, 0.1);
   --color-error-border: rgba(255, 0, 0, 0.3);
 
-  --color-warning: orange;
+  --color-warning: #fb923c;
+  --color-warning-bg: rgba(124, 58, 0, 0.6);
+  --color-warning-border: #f97316;
 
   --color-secondary-button: #6c757d;
   --color-secondary-button-hover: #5a6268;
@@ -64,20 +67,23 @@
   --color-border-hover: rgba(0, 0, 0, 0.2);
   --color-border-focus: rgba(0, 0, 0, 0.3);
 
-  --color-accent: #0064c8;
-  --color-accent-hover: #0052a3;
-  --color-accent-bg: rgba(0, 100, 200, 0.08);
-  --color-accent-bg-hover: rgba(0, 100, 200, 0.12);
+  --color-accent: #0ea5e9;
+  --color-accent-hover: #0284c7;
+  --color-accent-secondary: #7c3aed;
+  --color-accent-bg: rgba(14, 165, 233, 0.08);
+  --color-accent-bg-hover: rgba(14, 165, 233, 0.12);
 
-  --color-success: #00aa00;
-  --color-success-bg: rgba(0, 170, 0, 0.1);
-  --color-success-border: rgba(0, 170, 0, 0.3);
+  --color-success: #16a34a;
+  --color-success-bg: rgba(22, 163, 74, 0.1);
+  --color-success-border: rgba(22, 163, 74, 0.3);
 
   --color-error: #cc0000;
   --color-error-bg: rgba(204, 0, 0, 0.1);
   --color-error-border: rgba(204, 0, 0, 0.3);
 
-  --color-warning: #ff8800;
+  --color-warning: #ea580c;
+  --color-warning-bg: rgba(124, 58, 0, 0.15);
+  --color-warning-border: #f97316;
 
   --color-secondary-button: #6c757d;
   --color-secondary-button-hover: #5a6268;
@@ -128,7 +134,7 @@ body {
 .auth-section {
   background: var(--color-bg-secondary);
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--color-border);
   transition: all 0.3s ease;
   margin-bottom: 2rem;
@@ -149,7 +155,7 @@ body {
   align-items: center;
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 0.5rem 0.75rem;
   font-size: 0.9rem;
   z-index: 999;
@@ -188,16 +194,16 @@ label {
   color: var(--color-text-secondary);
 }
 
-input, textarea, select {
+input:not([type="radio"]):not([type="checkbox"]):not([type="file"]), textarea, select {
   padding: 0.5rem;
   border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--color-bg-input);
   color: var(--color-text-primary);
   font-size: 1rem;
 }
 
-input:focus, textarea:focus, select:focus {
+input:not([type="radio"]):not([type="checkbox"]):not([type="file"]):focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--color-accent);
 }
@@ -235,16 +241,19 @@ textarea {
 button {
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--color-accent);
   color: white;
   font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, box-shadow 0.2s;
 }
 
 button:hover:not(:disabled) {
   background: var(--color-accent-hover);
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.3);
 }
 
 button:disabled {
@@ -255,7 +264,7 @@ button:disabled {
 /* Status Messages */
 .status {
   padding: 0.5rem;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.9rem;
 }
 
@@ -277,6 +286,14 @@ button:disabled {
   color: var(--color-accent);
 }
 
+/* Shared width constraint matching the two-column split layout */
+.split-layout-width {
+  width: 100%;
+  max-width: calc(515px + 515px + 2rem); /* two columns + gap */
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* Split Layout */
 .split-layout {
   display: grid;
@@ -289,7 +306,7 @@ button:disabled {
 .editor-panel {
   background: var(--color-bg-secondary);
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--color-border);
   max-width: 515px;
 }
@@ -298,7 +315,7 @@ button:disabled {
   position: sticky;
   top: 2rem;
   background: var(--color-bg-tertiary);
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--color-border);
   overflow: hidden;
   max-width: 515px;
@@ -347,7 +364,6 @@ button:disabled {
 .primary-button {
   flex: 1;
   padding: 0.75rem 1.5rem;
-  font-weight: 500;
 }
 
 .secondary-button {
@@ -355,9 +371,10 @@ button:disabled {
   background-color: var(--color-secondary-button);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
+  font-weight: 500;
   transition: background-color 0.2s;
 }
 
@@ -369,7 +386,7 @@ button:disabled {
   background-color: transparent;
   color: var(--color-text-primary);
   border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
   line-height: 1;
@@ -389,7 +406,7 @@ button:disabled {
 .load-thread-section {
   background: var(--color-bg-secondary);
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--color-border);
   margin-bottom: 1.5rem;
 }
@@ -404,7 +421,7 @@ button:disabled {
   margin-bottom: 2rem;
   padding: 1rem;
   background: var(--color-bg-tertiary);
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--color-border);
   width: 100%;
 }
@@ -419,7 +436,7 @@ button:disabled {
   margin: 10px auto 0 auto;
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 10px;
   transition: all 0.2s ease;
   max-width: 515px;
 }
@@ -706,9 +723,89 @@ button:disabled {
 #main-content {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
+
+/* Audio duration warning */
+.audio-duration-warning {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--color-warning-bg);
+  border-left: 3px solid var(--color-warning-border);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: #fed7aa;
+}
+
+/* Parent post preview (reply preview) */
+.parent-post-preview {
+  margin-bottom: 0;
+  padding: 12px;
+  background: var(--color-bg-secondary);
+  border-radius: 8px;
+  border-left: 3px solid var(--color-accent);
+}
+
+.parent-post-preview-label {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+/* Post type radio row */
+.post-type-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.post-type-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.post-type-row input[type="radio"] {
+  cursor: pointer;
+}
+
+/* Preview empty state */
+.preview-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 40px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.preview-empty-icon {
+  font-size: 2rem;
+  opacity: 0.5;
+}
+
+.preview-empty-text {
+  font-size: 0.95rem;
+  opacity: 0.6;
+}
+
+/* File controls row */
+.file-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.file-controls-name {
+  flex: 1;
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
 
 /* Mobile responsive */
 @media (max-width: 1100px) {

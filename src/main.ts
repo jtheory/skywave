@@ -93,14 +93,14 @@ class SkyWaveApp {
         </div>
 
         <div id="main-content" style="display: none;">
-          <!-- Post type selection (condensed single line) -->
-          <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 1.5rem;">
-            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;">
-              <input type="radio" name="post-type" value="new" id="post-type-new" checked style="cursor: pointer;">
+          <!-- Post type selection -->
+          <div class="post-type-row split-layout-width">
+            <label>
+              <input type="radio" name="post-type" value="new" id="post-type-new" checked>
               <span>New post</span>
             </label>
-            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;">
-              <input type="radio" name="post-type" value="reply" id="post-type-reply" style="cursor: pointer;">
+            <label>
+              <input type="radio" name="post-type" value="reply" id="post-type-reply">
               <span>Reply to</span>
             </label>
             <div id="reply-url-container" style="display: none; flex: 1; position: relative;">
@@ -109,9 +109,9 @@ class SkyWaveApp {
             </div>
           </div>
 
-          <div id="parent-status"></div>
-          <div id="parent-post-preview" style="display: none; margin-bottom: 2rem; padding: 12px; background: var(--color-bg-secondary); border-radius: 8px; border-left: 3px solid #38bdf8;">
-            <div style="font-size: 0.9rem; opacity: 0.7; margin-bottom: 4px;">Replying to:</div>
+          <div id="parent-status" class="split-layout-width" style="display: none;"></div>
+          <div id="parent-post-preview" class="parent-post-preview split-layout-width" style="display: none;">
+            <div class="parent-post-preview-label">Replying to:</div>
             <div id="parent-post-content"></div>
           </div>
 
@@ -134,9 +134,9 @@ class SkyWaveApp {
               <div class="form-group">
                 <label for="background-image">Background Image (optional)</label>
                 <input type="file" id="background-image-input" accept="image/jpeg,image/jpg,image/png,image/webp" style="display: none;">
-                <div id="background-image-controls" style="display: flex; gap: 10px; align-items: center;">
+                <div id="background-image-controls" class="file-controls">
                   <button type="button" id="background-image-button" class="secondary-button" style="flex: 0 0 auto;">Choose Image</button>
-                  <span id="background-image-name" style="flex: 1; opacity: 0.7; font-size: 0.9rem;">No image selected</span>
+                  <span id="background-image-name" class="file-controls-name">No image selected</span>
                   <button type="button" id="remove-background-button" class="secondary-button" style="display: none; flex: 0 0 auto;">Remove</button>
                 </div>
 
@@ -146,15 +146,15 @@ class SkyWaveApp {
               <div class="form-group">
                 <label for="audio-file">Audio File</label>
                 <input type="file" id="audio-file-input" accept="audio/mp3,audio/wav,audio/m4a,audio/mp4,audio/mpeg,audio/x-m4a" style="display: none;">
-                <div id="audio-controls" style="display: flex; gap: 10px; align-items: center;">
+                <div id="audio-controls" class="file-controls">
                   <button type="button" id="audio-file-button" class="secondary-button" style="flex: 0 0 auto;">🎵 Choose Audio</button>
-                  <span id="audio-file-name" style="flex: 1; opacity: 0.7; font-size: 0.9rem;">No audio selected</span>
+                  <span id="audio-file-name" class="file-controls-name">No audio selected</span>
                   <button type="button" id="remove-audio-button" class="secondary-button" style="display: none; flex: 0 0 auto;">Remove</button>
                 </div>
-                <div id="audio-viz-options" style="margin-top: 10px; padding: 10px; background: var(--color-bg-secondary); border-radius: 4px; display: none;">
+                <div id="audio-viz-options" style="margin-top: 10px; padding: 10px; background: var(--color-bg-secondary); border-radius: 6px; display: none;">
                   <span style="font-size: 0.9rem; opacity: 0.8;">🎵 Waveform visualization video will be generated in the preview</span>
                 </div>
-                <div id="audio-duration-warning" style="display: none; margin-top: 8px; padding: 8px 10px; background: #7c3a00; border-left: 3px solid #f97316; border-radius: 4px; font-size: 0.875rem; color: #fed7aa;"></div>
+                <div id="audio-duration-warning" class="audio-duration-warning" style="display: none;"></div>
                 <small style="opacity: 0.7">MP3, M4A, or WAV. Will create a video with waveform visualization</small>
               </div>
 
@@ -173,8 +173,9 @@ class SkyWaveApp {
               </div>
               <div id="scene-preview" class="scene-preview">
                 <div id="preview-content">
-                  <div style="text-align: center; opacity: 0.5; padding: 40px;">
-                    Add content to see a preview
+                  <div class="preview-empty">
+                    <div class="preview-empty-icon">🎵</div>
+                    <div class="preview-empty-text">Add content to see a preview</div>
                   </div>
                 </div>
               </div>
@@ -409,9 +410,9 @@ class SkyWaveApp {
       if (authSection) authSection.style.display = 'none'
       if (authConnected) authConnected.style.display = 'flex'
       if (connectedHandle) {
-        connectedHandle.innerHTML = `<a href="https://bsky.app/profile/${handle}" target="_blank" style="color: #00bfff; text-decoration: none;">@${handle}</a>`
+        connectedHandle.innerHTML = `<a href="https://bsky.app/profile/${handle}" target="_blank" style="color: var(--color-accent); text-decoration: none;">@${handle}</a>`
       }
-      if (mainContent) mainContent.style.display = 'block'
+      if (mainContent) mainContent.style.display = 'flex'
     } else {
       if (authSection) authSection.style.display = 'block'
       if (authConnected) authConnected.style.display = 'none'
@@ -577,7 +578,7 @@ class SkyWaveApp {
       statusDiv.innerHTML = `
         <div class="status success">
           Post created successfully!
-          <a href="${postResponse.url}" target="_blank" style="color: #00bfff; text-decoration: underline;">
+          <a href="${postResponse.url}" target="_blank" style="color: var(--color-accent); text-decoration: underline;">
             View on Bluesky →
           </a>
         </div>
@@ -684,7 +685,7 @@ class SkyWaveApp {
 
         if (previewStatus) {
           previewStatus.textContent = '✓ Video ready'
-          previewStatus.style.color = '#4CAF50'
+          previewStatus.style.color = 'var(--color-success)'
         }
       } else {
         // Show "Generate video" button overlay
@@ -736,7 +737,7 @@ class SkyWaveApp {
     }
 
     if (!postText && !imageText && !this.backgroundImageData) {
-      previewContent.innerHTML = '<div style="text-align: center; opacity: 0.5; padding: 40px;">Add content to see a preview</div>'
+      previewContent.innerHTML = '<div class="preview-empty"><div class="preview-empty-icon">🎵</div><div class="preview-empty-text">Add content to see a preview</div></div>'
       if (previewStatus) previewStatus.textContent = ''
       return
     }
@@ -779,14 +780,14 @@ class SkyWaveApp {
 
         if (previewStatus) {
           previewStatus.textContent = '✓ Updated'
-          previewStatus.style.color = '#4CAF50'
+          previewStatus.style.color = 'var(--color-success)'
           setTimeout(() => {
             if (previewStatus) previewStatus.textContent = ''
           }, 2000)
         }
       } catch (error) {
         console.error('Failed to generate preview:', error)
-        previewContent.innerHTML = '<div style="text-align: center; opacity: 0.5; padding: 40px;">Preview generation failed</div>'
+        previewContent.innerHTML = '<div class="preview-empty"><div class="preview-empty-icon">⚠️</div><div class="preview-empty-text">Preview generation failed</div></div>'
       }
       return
     }
@@ -802,7 +803,7 @@ class SkyWaveApp {
 
     if (previewStatus) {
       previewStatus.textContent = '✓ Updated'
-      previewStatus.style.color = '#4CAF50'
+      previewStatus.style.color = 'var(--color-success)'
       setTimeout(() => {
         if (previewStatus) previewStatus.textContent = ''
       }, 2000)
@@ -862,7 +863,7 @@ class SkyWaveApp {
           const originalMins = Math.floor(duration / 60)
           const originalSecs = Math.floor(duration % 60)
           previewStatus.textContent = `⚠️ Audio is ${originalMins}:${String(originalSecs).padStart(2, '0')} — truncating to 3:00`
-          previewStatus.style.color = '#f97316'
+          previewStatus.style.color = 'var(--color-warning)'
         }
         // Brief pause so user can read the truncation notice
         await new Promise(resolve => setTimeout(resolve, 1500))
@@ -898,7 +899,7 @@ class SkyWaveApp {
       console.error('Failed to generate video preview:', error)
       if (previewStatus) {
         previewStatus.textContent = '❌ Failed'
-        previewStatus.style.color = '#f44336'
+        previewStatus.style.color = 'var(--color-error)'
       }
     } finally {
       this.updatePostButtonState()
@@ -950,7 +951,8 @@ class SkyWaveApp {
   }
 
   private showStatus(element: HTMLElement, message: string, type: 'success' | 'error' | 'info'): void {
-    element.className = 'status ' + type
+    const baseClasses = Array.from(element.classList).filter(c => c !== 'status' && c !== 'success' && c !== 'error' && c !== 'info')
+    element.className = [...baseClasses, 'status', type].join(' ')
     element.textContent = message
     element.style.display = 'block'
 
